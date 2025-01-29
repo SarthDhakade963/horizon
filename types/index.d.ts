@@ -147,7 +147,6 @@ declare interface BankInfoProps {
   appwriteItemId?: string;
   type: "full" | "card";
 }
-
 declare interface HeaderBoxProps {
   type?: "title" | "greeting";
   title: string;
