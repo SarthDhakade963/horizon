@@ -16,43 +16,75 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import CustomInput from "./CustomInput";
-import { Icon } from "react-icons-kit";
-import { eyeOff } from "react-icons-kit/feather/eyeOff";
-import { eye } from "react-icons-kit/feather/eye";
-import { Loader2 } from "lucide-react";
+import { authFormSchema } from "@/lib/utils";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { log } from "console";
+import SignUp from "@/app/(auth)/sign-up/page";
+import { useRouter } from "next/navigation";
+import { getLoggedInUser, signIn, signUp } from "@/lib/actions/user.actions";
+import SignIn from "@/app/(auth)/sign-in/page";
 
 // Zod is straight forward form validation tools allowing the fields to choose in our schema allowing the freedom to choose the type, minimun and maximum of the particular field.
-export const formSchema = z.object({
-  email: z.string(),
-  password: z.string(),
-});
+// export const formSchema = ({type}) => z.object({
+//   email: z.string().email(),
+//   password: z.string(),
+//   // sign-up
+//   firstName: z.string().min(3),
+//   lastName: z.string().min(3),
+//   address : z.string().min(3),
+//   state : z.string().min(3),
+//   postalCode : z.string().min(6),
+//   dob : z.string().min(3),
+//   SSN : z.string().min(3),
+// });
 
-interface AuthFormProps {
-  type: string;
-}
-
-const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
+const AuthForm = ({ type }: { type: string }) => {
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  // Define the form
+  const [showPassword, setShowPassword] = useState(false);
+
+  // const loggedInUser = await getLoggedInUser();
+  const formSchema = authFormSchema(type);
+
+  // Define the form for sign-in
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      password: "0",
+      password: "",
     },
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    console.log("Form is Submitting...");
     setIsLoading(true);
-    console.log(values);
-    setIsLoading(false);
-  }
+
+    try {
+      // sign up with Appwrite & create plaid token
+      if (type === "sign-up") {
+        const newUser = await signUp(data);
+        setUser(newUser);
+      }
+
+      if (type === "sign-in") {
+        //
+        const response = await signIn({
+          email: data.email,
+          password: data.password,
+        });
+
+        response ? router.push("/") : router.push("/sign-up");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      console.log("Form Submitted");
+      setIsLoading(false);
+    }
+  };
 
   return (
     <section className="auth-form ">
@@ -76,6 +108,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                 ? "Link your Account to get started"
                 : "Please enter your details"}
             </p>
+            
           </h1>
         </div>
       </header>
@@ -86,6 +119,92 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
         <>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {type === "sign-up" && (
+                <>
+                  <div className="grid grid-rows-5 grid-cols-2 gap-3">
+                    <div className="grid-rows-1 grid-cols-1">
+                      <CustomInput
+                        control={form.control}
+                        name="firstName"
+                        label="First Name"
+                        placeholder="Enter your First Name"
+                        type="text"
+                      />
+                    </div>
+
+                    <div className="grid-rows-1 grid-cols-2">
+                      <CustomInput
+                        control={form.control}
+                        name="lastName"
+                        label="Last Name"
+                        placeholder="Enter your Last Name"
+                        type="text"
+                      />
+                    </div>
+
+                    <div className="grid-rows-2 col-start-1 col-end-3 ">
+                      <CustomInput
+                        control={form.control}
+                        name="address1"
+                        label="Address"
+                        placeholder="Enter your Permanent Address"
+                        type="text"
+                      />
+                    </div>
+
+                    <div className="grid-rows-3 col-start-1 col-end-3">
+                      <CustomInput
+                        control={form.control}
+                        name="city"
+                        label="City"
+                        placeholder="Enter your City Name"
+                        type="text"
+                      />
+                    </div>
+
+                    <div className="grid-rows-4 grid-cols-3">
+                      <CustomInput
+                        control={form.control}
+                        name="state"
+                        label="State"
+                        placeholder="MH"
+                        type="text"
+                      />
+                    </div>
+
+                    <div className="grid-rows-4 grid-cols-2">
+                      <CustomInput
+                        control={form.control}
+                        name="postalCode"
+                        label="Postal Code"
+                        placeholder="400001"
+                        type="text"
+                      />
+                    </div>
+
+                    <div className="grid-rows-5 grid-cols-1">
+                      <CustomInput
+                        control={form.control}
+                        name="dateOfBirth"
+                        label="Date of Birth"
+                        placeholder="yyyy-mm-dd"
+                        type="text"
+                      />
+                    </div>
+
+                    <div className="grid-rows-5 grid-cols-2">
+                      <CustomInput
+                        control={form.control}
+                        name="ssn"
+                        label="SSN"
+                        placeholder="1234"
+                        type="text"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
               <CustomInput
                 control={form.control}
                 name="email"
@@ -99,7 +218,15 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                 name="password"
                 label="Password"
                 placeholder="Enter your Password"
-                type="password"
+                type={showPassword ? "text" : "password"}
+                icon={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                }
               />
 
               <Button type="submit" className="form-btn" disabled={isLoading}>
