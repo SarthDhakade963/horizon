@@ -6,15 +6,18 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "open-sentry": "start https://sentry.io/account/settings/wizard/7fasg5bof1zkqthvgg9dzpcykmwo2owhn1anj15fwk5d9xi2i9o2alxo93rrwh5d/?project_platform=javascript-nextjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-dialog": "^1.1.5",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.1",
+    "@sentry/nextjs": "^8.54.0",
     "banking_app": "file:",
     "chart.js": "^4.4.7",
+    "child_process": "^1.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.474.0",
