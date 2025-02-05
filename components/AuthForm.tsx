@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,11 +19,8 @@ import {
 import CustomInput from "./CustomInput";
 import { authFormSchema } from "@/lib/utils";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { log } from "console";
-import SignUp from "@/app/(auth)/sign-up/page";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { getLoggedInUser, signIn, signUp } from "@/lib/actions/user.actions";
-import SignIn from "@/app/(auth)/sign-in/page";
 
 // Zod is straight forward form validation tools allowing the fields to choose in our schema allowing the freedom to choose the type, minimun and maximum of the particular field.
 // export const formSchema = ({type}) => z.object({
@@ -54,6 +51,14 @@ const AuthForm = ({ type }: { type: string }) => {
     defaultValues: {
       email: "",
       password: "",
+      firstName: "",
+      lastName: "",
+      address1: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      dateOfBirth: "",
+      ssn: "",
     },
   });
 
@@ -76,7 +81,13 @@ const AuthForm = ({ type }: { type: string }) => {
           password: data.password,
         });
 
-        response ? router.push("/") : router.push("/sign-up");
+        if (response?.$id) {
+          // Check if response contains user ID
+          router.push("/");
+        } else {
+          console.error("Sign-in failed:", response);
+          router.push("/sign-up");
+        }
       }
     } catch (error) {
       console.log(error);
@@ -85,6 +96,16 @@ const AuthForm = ({ type }: { type: string }) => {
       setIsLoading(false);
     }
   };
+
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  if (!isHydrated) {
+    return null; // or a loading state
+  }
 
   return (
     <section className="auth-form ">
@@ -101,14 +122,13 @@ const AuthForm = ({ type }: { type: string }) => {
         <div className="flex flex-col gap-1 md:gap-3">
           <h1 className="text-24 lg:text-36 font-semibold text-gray-900">
             {/* if user then link account else if (type === 'sign in' the Sign In else Sign Up) */}
-            {user ? "Link Account" : type === "sign-in" ? "Sign In" : "Sign Up"}
+            {isHydrated && user ? "Link Account" : type === "sign-in" ? "Sign In" : "Sign Up"}
 
             <p className="text-16 font-normal text-gray-600 ">
               {user
                 ? "Link your Account to get started"
                 : "Please enter your details"}
             </p>
-            
           </h1>
         </div>
       </header>
@@ -129,6 +149,7 @@ const AuthForm = ({ type }: { type: string }) => {
                         label="First Name"
                         placeholder="Enter your First Name"
                         type="text"
+                        value={form.watch("firstName") || ""}
                       />
                     </div>
 
@@ -139,6 +160,7 @@ const AuthForm = ({ type }: { type: string }) => {
                         label="Last Name"
                         placeholder="Enter your Last Name"
                         type="text"
+                        value={form.watch("lastName") || ""}
                       />
                     </div>
 
@@ -149,6 +171,7 @@ const AuthForm = ({ type }: { type: string }) => {
                         label="Address"
                         placeholder="Enter your Permanent Address"
                         type="text"
+                        value={form.watch("address1") || ""}
                       />
                     </div>
 
@@ -159,6 +182,7 @@ const AuthForm = ({ type }: { type: string }) => {
                         label="City"
                         placeholder="Enter your City Name"
                         type="text"
+                        value={form.watch("city") || ""}
                       />
                     </div>
 
@@ -169,6 +193,7 @@ const AuthForm = ({ type }: { type: string }) => {
                         label="State"
                         placeholder="MH"
                         type="text"
+                        value={form.watch("state") || ""}
                       />
                     </div>
 
@@ -179,6 +204,7 @@ const AuthForm = ({ type }: { type: string }) => {
                         label="Postal Code"
                         placeholder="400001"
                         type="text"
+                        value={form.watch("postalCode") || ""}
                       />
                     </div>
 
@@ -189,6 +215,7 @@ const AuthForm = ({ type }: { type: string }) => {
                         label="Date of Birth"
                         placeholder="yyyy-mm-dd"
                         type="text"
+                        value={form.watch("dateOfBirth") || ""}
                       />
                     </div>
 
@@ -199,6 +226,7 @@ const AuthForm = ({ type }: { type: string }) => {
                         label="SSN"
                         placeholder="1234"
                         type="text"
+                        value={form.watch("ssn") || ""}
                       />
                     </div>
                   </div>
@@ -211,6 +239,7 @@ const AuthForm = ({ type }: { type: string }) => {
                 label="Email"
                 placeholder="Enter your Email"
                 type="text"
+                value={form.watch("email") || ""}
               />
 
               <CustomInput
@@ -227,6 +256,7 @@ const AuthForm = ({ type }: { type: string }) => {
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 }
+                value={form.watch("password") || ""}
               />
 
               <Button type="submit" className="form-btn" disabled={isLoading}>

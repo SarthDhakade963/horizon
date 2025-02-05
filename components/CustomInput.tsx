@@ -20,6 +20,7 @@ interface CustomInputProps {
   placeholder: string;
   type: string;
   icon?: ReactNode;
+  value?:string;
 }
 
 const CustomInput = ({
@@ -29,6 +30,7 @@ const CustomInput = ({
   placeholder,
   type,
   icon,
+  value,
 }: CustomInputProps) => {
   return (
     <div>
@@ -49,6 +51,8 @@ const CustomInput = ({
                   className="input-class"
                   {...field}
                   type={type}
+                  autoComplete={autocompleteMap[name]} 
+                  value={value}
                 />
                 {icon && (
                   <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer">

@@ -15,7 +15,7 @@ const Home = async () => {
           <HeaderBox
             type="greeting"
             title="Welcome"
-            user={loggedIn?.name || "Guest"} // ? means if the firstName is not provided or not accessed it will not throw error
+            user={loggedIn?.name.split(" ")[0] || "Guest"} // ? means if the firstName is not provided or not accessed it will not throw error
             subtext="Access and Manage your Account transaction efficiently."
           />
 
