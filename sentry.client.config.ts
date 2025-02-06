@@ -2,7 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
   dsn: "https://59a2ad87e16531cb41aff6f1efc34f53@o4508760018976768.ingest.us.sentry.io/4508760159551488",
-  
+
   // Replay may only be enabled for the client-side
   integrations: [Sentry.replayIntegration()],
 
@@ -12,6 +12,11 @@ Sentry.init({
   // Learn more at
   // https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
   tracesSampleRate: 1.0,
+  debug: true, // Helps in debugging issues
+  beforeSend(event) {
+    console.log("Captured event:", event);
+    return event; // Check if the first error is being logged
+  },
 
   // Capture Replay for 10% of all sessions,
   // plus for 100% of sessions with an error
