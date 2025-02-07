@@ -21,6 +21,7 @@ import { authFormSchema } from "@/lib/utils";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { redirect, useRouter } from "next/navigation";
 import { getLoggedInUser, signIn, signUp } from "@/lib/actions/user.actions";
+import PlaidLink from "./PlaidLink";
 
 // Zod is straight forward form validation tools allowing the fields to choose in our schema allowing the freedom to choose the type, minimun and maximum of the particular field.
 // export const formSchema = ({type}) => z.object({
@@ -68,9 +69,21 @@ const AuthForm = ({ type }: { type: string }) => {
     setIsLoading(true);
 
     try {
+      const userData = {
+        firstName: data.firstName!, // by adding exclamation we are letting ts know that it will be there when you try access it from the database
+        lastName: data.lastName!,
+        address1: data.address1!,
+        city: data.city!,
+        state: data.state!,
+        postalCode: data.postalCode!,
+        ssn: data.ssn!,
+        dateOfBirth: data.dateOfBirth!,
+        email: data.email,
+        password: data.password,
+      };
       // sign up with Appwrite & create plaid token
       if (type === "sign-up") {
-        const newUser = await signUp(data);
+        const newUser = await signUp(userData);
         setUser(newUser);
       }
 
@@ -122,7 +135,11 @@ const AuthForm = ({ type }: { type: string }) => {
         <div className="flex flex-col gap-1 md:gap-3">
           <h1 className="text-24 lg:text-36 font-semibold text-gray-900">
             {/* if user then link account else if (type === 'sign in' the Sign In else Sign Up) */}
-            {isHydrated && user ? "Link Account" : type === "sign-in" ? "Sign In" : "Sign Up"}
+            {isHydrated && user
+              ? "Link Account"
+              : type === "sign-in"
+              ? "Sign In"
+              : "Sign Up"}
 
             <p className="text-16 font-normal text-gray-600 ">
               {user
@@ -134,7 +151,10 @@ const AuthForm = ({ type }: { type: string }) => {
       </header>
 
       {user ? (
-        <div className="flex flex-col gap-4">{/* PlaidLink */}</div>
+        <div className="flex flex-col gap-4">
+          {/* variant will decide the use of it */}
+          <PlaidLink user={user} variant="primary" />
+        </div>
       ) : (
         <>
           <Form {...form}>
